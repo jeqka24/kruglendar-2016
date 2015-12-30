@@ -1,7 +1,8 @@
 //Changable variables
 //relative to size
 var svg_size = [2104.72, 2979.92],
-    center = [0.5, 0.4698];
+    center = [0.5, 0.5];
+//    center = [0.5, 0.4698];
 //abs
 //var gap = 0.1, // gap for new year
 var gap = 0.01, // gap for new year
@@ -11,6 +12,8 @@ var gap = 0.01, // gap for new year
 	r = R/12; // inner radius
 //others
 var datesSpan = [new Date(2016, 0, 1), new Date(2016, 11, 31)];
+var dateSeparator = 0.0002*svg_size[0];
+
 //var fontFamily = "Roboto Condensed Light";
 //var fontFamilyWeekend = "Roboto";
 //var fontFamily = "Antonio";
@@ -20,6 +23,7 @@ var datesSpan = [new Date(2016, 0, 1), new Date(2016, 11, 31)];
 //var fontFamily = "HFF Jammed Pack"; // unreadable
 var fontFamily = "Bebas Neue";
 var fontWeight = "normal";
+
 //var fontFamilyWeekend = "Arial Black";
 //var fontFamilyWeekend = "Impact";
 //var fontFamilyWeekend = "Steelfish";
@@ -30,19 +34,20 @@ var fontScaleWeekend = 1.5;
 //var fontWeight = "normal";
 //var fontFamilyWeekend = "Sorren Ex Bold";
 //var fontWeightWeekend = "normal";
-var dateSeparator = 0.0002*svg_size[0];
-//var fontFamily = "Varicka";
-//var fontFamily = "Higherup";
-//var fontFamily = "Xenophobia";
-//var fontWeight = "Light";
-//var fontFamily = "msam10";
-//font-family: 'Sorren Ex Bold'
-//font-family: 'Sorren Ex Medium'
+
+
+//var fontFamilyMonth = "Varicka";
+//var fontFamilyMonth = "Higherup";
+//var fontFamilyMonth = "Xenophobia";
+//var fontWeightMonth = "Light";
+//var fontFamilyMonth = "msam10";
+//var fontFamilyMonth = "Sorren Ex Bold"
+//vat fontFamilyMonth = "Sorren Ex Medium"
 var fontFamilyMonth = "Bebas Neue Light";
 var fontFamilyMonthWeight = "100";
-var monthes_font_size = 2.5*svg_size[1]/150;
-//var monthes_radius = R*0.78;
-var monthes_radius = R;
+
+var months_font_size = 2.5*svg_size[1]/150;
+var months_radius = R;
 //var skew_factor = 1.2;
 var skew_factor = 0; // disable skewing
 var description_pos = [0.5, 0.98];
@@ -57,8 +62,6 @@ var pi = Math.PI;
 
 //processing some vars
 r *= (1-gap) // gap cause inner radius to be smaller
-//var r2 = 0.18*r;// drawing point distance
-//var r2 = 0.28*r;// drawing point distance
 var r2 = 0.3*r;// drawing point distance
 var hypotrochoidAngleSpan = 2*pi*(1-gap);
 
@@ -69,7 +72,23 @@ var hypotrochoidAngleSpan = 2*pi*(1-gap);
 // Functions
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+// Comment - We replaced hypotrochoid with trochoid.
+// takes relative day in month position 
+// ex. first day of the month is 0, last one is 1, middle one is 0.5
+// returns ro (distance to point of hypotrochoid)
+function trochoid(pos){
+  if (pos > 0.5){
+    pos = 1 - pos;
+  }
+  pos *= pi;
+  // fooplot
+  // 69.45*acos((69.45-s)/19.44)-19.44*sqrt(1-((69.45-s)/19.44)^2)
+  //var y = r  * Math.acos( (r-pos)/r2 ) - //TODO this is greater than 1 sometimes
+          //r2 * Math.sqrt( 1 - Math.pow( (r-pos)/r2 , 2 ) );
+  //y /= 10;
+  y = R-r2*1.8*Math.sin(pos);
+  return y;
+}
 
 // for hypotrochoid finds couple [theta, ro] for given psi (angle to rolling circle)
 // takes angle psi in radians
@@ -131,23 +150,6 @@ function pos2ro(pos){
   return theta2ro(theta);
 }
 
-// we replace hypotrochoid with trochoid.
-// takes relative day in month position 
-// ex. first day of the month is 0, last one is 1, middle one is 0.5
-// returns ro (distance to point of hypotrochoid)
-//function trochoid(pos){
-  //if (pos > 0.5){
-    //pos = 1 - pos;
-  //}
-  //pos *= pi;
-  //// fooplot
-  //// 69.45*acos((69.45-s)/19.44)-19.44*sqrt(1-((69.45-s)/19.44)^2)
-  ////var y = r  * Math.acos( (r-pos)/r2 ) - //TODO this is greater than 1 sometimes
-          ////r2 * Math.sqrt( 1 - Math.pow( (r-pos)/r2 , 2 ) );
-  ////y /= 10;
-  //y = R-r2*1.8*Math.sin(pos);
-  //return y;
-//}
 
 
 
@@ -172,7 +174,7 @@ function draw(){
 
   var rainbow = [ 
     [1,149,213],
-    [0.178,227],
+    [0,178,227],
     //[5,167,170],
     //[9,162,95],
     [133,198,70],
@@ -195,10 +197,9 @@ function draw(){
     .map( function(rgb){
       return d3.rgb(rgb[0], rgb[1], rgb[2]);
     });
-  //console.log("hello");
   //console.log(0, 1.0, 1.0 / (rainbow.length-1));
   var colorScale = d3.scale.linear()
-    //.domain(d3.range(0, 1.0, 1.0 / (rainbow.length-1)))
+    // .domain(d3.range(0, 1.0, 1.0 / (rainbow.length-1)))
     .domain([0, 0.09, 0.18, 0.36, 0.45, 0.54, 0.63, 0.72, 0.81, 0.90, 1])
     //.domain([ 0, 0.166, 0.333, 0.5, 0.666, 0.833, 1])
     //.domain([ 0, 0.166, 0.233, 0.5, 0.666, 0.833 ])
@@ -211,7 +212,11 @@ function draw(){
   var dateFormatDate = d3.time.format("%-d");
   var dateFormatDay = d3.time.format("%A");
   var dateFormatMonth = d3.time.format("%-m");
-  var dateFormatMonthName = d3.time.format("%B");
+  var dateFormatMonthName = function (d){ 
+        var months=["Январь","Февраль","Март","Апрель","Май", "Июнь","Июль","Август", "Сентябрь","Октябрь","Ноябрь","Декабрь"]; 
+        return months[d.getMonth()];
+    };
+  
   var datesStringLength = 0;
   var dates = d3.time.scale()
     .domain(datesSpan)
@@ -274,6 +279,7 @@ function draw(){
   });
 
   var previousLen = 0;
+// the magic
   monthKerning = [
     "0 0 0 1.55 -0.85000008 0 -2.4299998",
     "0 0 0 0 0 -0.95000011 -0.54999995 -0.98999995",
@@ -288,7 +294,7 @@ function draw(){
     "0 0 -2.1399999 -1.42 -0.75000006 1",
     "0 0 -1.42 -1.2900001 0 1.33"
     ];
-  var monthes = d3.nest()
+  var months = d3.nest()
   .key(function(d){ return d.month; })
   .entries(dates)
   .map(function(d){
@@ -344,7 +350,7 @@ function draw(){
   var text_dates = calendar.append("g")
     .classed("text-dates", true);
   var month_g;
-  for (m of monthes){
+  for (m of months){
     month_g = text_dates
       .append("g")
       .classed(m.monthName, true);
@@ -437,40 +443,27 @@ function draw(){
                 +"text-decoration: "+ decoration +";";
         }
       });
-
-    //dates_g.filter(function(d){return d.weekend;}).insert("rect", "text")
-      //.attr({
-        //"fill": function(d){return m.color;},
-        //"paddHor": function(d){
-          //return paddHor;/[>transitionY/R;
-        //},
-      //});
-    //month_g.selectAll("rect")
-      //.attr("x", function(d) {return this.parentNode.getBBox().x - paddHor;})
-      //.attr("y", function(d) {return this.parentNode.getBBox().y - paddVer;})
-      //.attr("width", function(d) {return this.parentNode.getBBox().width + 2*paddHor;})
-      //.attr("height", function(d) {return this.parentNode.getBBox().height + 2*paddVer;});
-
-
-
   }
 
   var arc = d3.svg.arc()
-    .innerRadius(monthes_radius)
-    .outerRadius(monthes_radius)
+    .innerRadius(months_radius)
+    .outerRadius(months_radius)
     .startAngle(-pi/4)
     .endAngle(pi/4);
-  var text_monthes = calendar.append("g")
-    .classed("text-monthes", true);
-  var monthesPath = text_monthes.append("path")
+    
+  var text_months = calendar.append("g")
+    .classed("text-months", true);
+    
+  var monthsPath = text_months.append("path")
     .attr({
       d: arc,
       fill: "none",
       stroke: "none",
-      id: "monthesPath"
+      id: "monthsPath"
     });
-  var monthes_g = text_monthes.selectAll("g.month")
-    .data(monthes)
+    
+  var months_g = text_months.selectAll("g.month")
+    .data(months)
     .enter()
     .append("g")
     .attr("transform", function(d){
@@ -479,7 +472,7 @@ function draw(){
     })
     .classed("month", true)
     .append("text")
-    .style({"font-size": monthes_font_size,
+    .style({"font-size": months_font_size,
             "letter-spacing": "5px",
             "font-family": fontFamilyMonth,
             "font-weight": fontFamilyMonthWeight,
@@ -492,7 +485,7 @@ function draw(){
     })
     .append("textPath")
     .attr({
-      "xlink:href": "#monthesPath",
+      "xlink:href": "#monthsPath",
       startOffset: "25%",
     })
     .text(function(d){
@@ -507,28 +500,17 @@ function draw(){
   var description = svg.append("text")
     .classed("extra", true)
     .attr({
-      transform: "translate("
-      + svg_size[0]*description_pos[0] 
-      + "," 
-      + svg_size[1]*description_pos[1]
-      + ")",
-     style: "font-size:"+decoration_font_size+"px;text-align:center;text-anchor:middle;font-family:Roboto Condensed;letter-spacing:0.01em;",
+      "transform": "translate(" + svg_size[0]*description_pos[0] + "," + svg_size[1]*description_pos[1] + ")"})
+    .style({ 
+        "font-size": decoration_font_size+"px",
+        "text-align":"center",
+        "text-anchor":"middle",
+        "font-family":"Roboto Condensed",
+        "letter-spacing":"0.01em",
     });
-  description.append("tspan")
-    .attr({ 
-      "xml:space": "preserve",
-    })
-    .text("Kruglendar — the poster diary. Download from ");
-  description.append("tspan")
-    .attr({ 
-      style: "font-weight: bold; /*text-decoration: underline;*/ fill: #0195d5;",
-    })
-    .text("www.kruglendar.ru");
-  description.append("tspan")
-    .attr({ 
-      "xml:space": "preserve",
-    })
-    .text(" for free");
+    
+
+  
     //.text(" for free · ");
   //description.append("tspan")
     //.attr({
@@ -544,11 +526,7 @@ function draw(){
     
   var label = svg.append("g")
   .attr({
-    transform: "translate("
-    + (svg_size[0]*center[0])
-    + "," 
-    + (svg_size[1]*center[1] + R*0.034)
-    + ") scale(0.4)",
+    transform: "translate(" + (svg_size[0]*center[0]) + ","  + (svg_size[1]*center[1] + R*0.034) + ") scale(0.4)",
   });
   label.append("text")
     .text("Kruglendar")
